@@ -1,0 +1,13 @@
+assetWizardSettings.xml
+compiler.xml
+deploymentTargetDropDown.xml
+gradle.xml
+jarRepositories.xml
+misc.xml
+modules.xml
+vcs.xml
+workspace.xml
+kotlinc.xml
+*.iml
+
+modules/
