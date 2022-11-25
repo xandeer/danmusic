@@ -67,25 +67,33 @@ robolectric = "org.robolectric:robolectric:4.9"
 svg = "com.caverock:androidsvg-aar:1.4"
 
 [bundles]
+compose = [
+  "androidx-activity-compose",
+  "androidx-lifecycle-viewmodel-compose",
+  "compose-foundation",
+  "compose-material3",
+  "compose-ui-tooling",
+  "compose-preview"
+]
 test-jvm = [
-    "androidx-test-core",
-    "androidx-test-junit",
-    "androidx-test-rules",
-    "androidx-test-runner",
-    "coroutines-test",
-    "junit",
-    "kotlin-test",
-    "okhttp-mockwebserver",
-    "okio-fakefilesystem",
-    "robolectric"
+  "androidx-test-core",
+  "androidx-test-junit",
+  "androidx-test-rules",
+  "androidx-test-runner",
+  "coroutines-test",
+  "junit",
+  "kotlin-test",
+  "okhttp-mockwebserver",
+  "okio-fakefilesystem",
+  "robolectric"
 ]
 test-android = [
-    "androidx-test-core",
-    "androidx-test-junit",
-    "androidx-test-rules",
-    "androidx-test-runner",
-    "coroutines-test",
-    "junit",
-    "kotlin-test",
-    "okhttp-mockwebserver"
+  "androidx-test-core",
+  "androidx-test-junit",
+  "androidx-test-rules",
+  "androidx-test-runner",
+  "coroutines-test",
+  "junit",
+  "kotlin-test",
+  "okhttp-mockwebserver"
 ]

@@ -29,11 +29,7 @@ setupAppModule(name = "danmusic.app") {
 
 dependencies {
   implementation(platform(libs.compose.bom))
-  implementation(libs.androidx.activity.compose)
-  implementation(libs.compose.ui.tooling)
-  implementation(libs.compose.preview)
-  implementation(libs.androidx.lifecycle.viewmodel.compose)
-  implementation(libs.compose.material3)
+  implementation(libs.bundles.compose)
 
   testImplementation(libs.junit)
 
