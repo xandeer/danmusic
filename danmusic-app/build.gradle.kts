@@ -30,8 +30,10 @@ setupAppModule(name = "danmusic.app") {
 dependencies {
   implementation(platform(libs.compose.bom))
   implementation(libs.bundles.compose)
+  implementation(libs.retrofit)
+  implementation(libs.moshi)
 
-  testImplementation(libs.junit)
+  testImplementation(libs.bundles.test.jvm)
 
   androidTestImplementation(libs.bundles.test.android)
 }
