@@ -2,7 +2,7 @@ import danmusic.setupAppModule
 
 plugins {
   id("com.android.application")
-  id("kotlin-android")
+  kotlin("android")
 }
 
 setupAppModule(name = "danmusic.app") {
@@ -30,8 +30,13 @@ setupAppModule(name = "danmusic.app") {
 dependencies {
   implementation(platform(libs.compose.bom))
   implementation(libs.bundles.compose)
+
+  implementation(libs.koin.android)
+
   implementation(libs.retrofit)
-  implementation(libs.moshi)
+  implementation(libs.retrofit.moshi)
+
+  implementation(libs.timber)
 
   testImplementation(libs.bundles.test.jvm)
 

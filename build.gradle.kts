@@ -1,4 +1,3 @@
-import danmusic.by
 import danmusic.groupId
 import danmusic.versionName
 import kotlinx.validation.ApiValidationExtension

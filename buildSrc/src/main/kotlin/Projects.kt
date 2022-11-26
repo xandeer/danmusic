@@ -10,7 +10,6 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
-
 fun Project.setupLibraryModule(
   name: String?,
   buildConfig: Boolean = false,
@@ -44,7 +43,8 @@ private inline fun <reified T : BaseExtension> Project.setupBaseModule(
   defaultConfig {
     minSdk = project.minSdk
     targetSdk = project.targetSdk
-    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+//    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunner = "danmusic.app.InstrumentationTestRunner"
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_1_8
