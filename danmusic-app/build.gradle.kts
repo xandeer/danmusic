@@ -31,7 +31,13 @@ dependencies {
   implementation(platform(libs.compose.bom))
   implementation(libs.bundles.compose)
 
+  implementation(libs.coil)
+  implementation(libs.coil.compose)
+
   implementation(libs.koin.android)
+
+  implementation(libs.paging)
+  implementation(libs.paging.compose)
 
   implementation(libs.retrofit)
   implementation(libs.retrofit.moshi)

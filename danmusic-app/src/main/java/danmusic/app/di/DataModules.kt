@@ -1,6 +1,7 @@
 package danmusic.app.di
 
 import danmusic.app.data.source.DanRepository
+import danmusic.app.data.source.PlaylistPagingSource
 import danmusic.app.data.source.remote.DanRemoteDataSource
 import danmusic.app.viewmodel.DanViewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
@@ -17,6 +18,8 @@ val DataModule = module {
       .build()
       .create(DanRemoteDataSource::class.java)
   }
+
+  singleOf(::PlaylistPagingSource)
 
   singleOf(::DanRepository)
 

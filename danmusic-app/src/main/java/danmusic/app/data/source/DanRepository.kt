@@ -9,6 +9,8 @@ import timber.log.Timber
 class DanRepository(private val remote: DanRemoteDataSource) {
   private val timber by lazy { Timber.tag("DanRepository") }
 
+  fun playListPagingSource() = PlaylistPagingSource(remote)
+
   /**
    * Cached paging parameter, used to get the next page of data.
    */
@@ -22,11 +24,16 @@ class DanRepository(private val remote: DanRemoteDataSource) {
    */
   suspend fun getTopPlaylists(size: Int = 1, anchor: Long = this.anchor) =
     withContext(Dispatchers.IO) {
-      remote.getTopPlaylists(size, anchor).playlists.also {
-        it.lastOrNull()?.let { last ->
-          this@DanRepository.anchor = last.updateTime
+      timber.d("getTopPlaylists: size=$size, anchor=$anchor")
+      try {
+        remote.getTopPlaylists(size, anchor).playlists.also {
+          it.lastOrNull()?.let { last ->
+            this@DanRepository.anchor = last.updateTime
+          }
         }
-        timber.d("playlists: $it")
+      } catch (e: Exception) {
+        timber.e(e, "getTopPlaylists() failed")
+        return@withContext emptyList<Playlist>()
       }
     }
 }

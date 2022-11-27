@@ -1,33 +1,25 @@
 package danmusic.app.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import danmusic.app.data.Playlist
 import danmusic.app.data.source.DanRepository
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+
+private const val ITEMS_PER_PAGE = 7
 
 class DanViewModel constructor(
   private val danRepository: DanRepository
 ) : ViewModel() {
-  var playlists by mutableStateOf(emptyList<Playlist>())
-    private set
 
-  fun pullPlaylists() {
-    viewModelScope.launch {
-      danRepository.getTopPlaylists().let {
-        playlists = playlists + it
-      }
-    }
-  }
-
-  fun clearPlaylists() {
-    playlists = emptyList()
-  }
-
-  init {
-    pullPlaylists()
-  }
+  val playlists: Flow<PagingData<Playlist>> = Pager(
+    config = PagingConfig(pageSize = ITEMS_PER_PAGE, enablePlaceholders = false),
+    pagingSourceFactory = { danRepository.playListPagingSource() }
+  )
+    .flow
+    .cachedIn(viewModelScope)
 }
