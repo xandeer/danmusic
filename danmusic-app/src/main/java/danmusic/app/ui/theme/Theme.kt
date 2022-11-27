@@ -56,8 +56,8 @@ fun DanmusicTheme(
   if (!view.isInEditMode) {
     SideEffect {
       (view.context as Activity).window.let {
-        it.statusBarColor = colorScheme.primary.toArgb()
-        WindowCompat.getInsetsController(it, view).isAppearanceLightStatusBars = darkTheme
+        it.statusBarColor = colorScheme.surface.toArgb()
+        WindowCompat.getInsetsController(it, view).isAppearanceLightStatusBars = !darkTheme
       }
     }
   }
