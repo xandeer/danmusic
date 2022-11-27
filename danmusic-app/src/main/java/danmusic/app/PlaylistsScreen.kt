@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -32,32 +35,44 @@ import danmusic.app.ui.theme.DanmusicTheme
 import danmusic.app.viewmodel.DanViewModel
 import org.koin.androidx.compose.getViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PlaylistsScreen() {
   val vm: DanViewModel = getViewModel()
   val playlists = vm.playlists.collectAsLazyPagingItems()
-  Box(modifier = Modifier.fillMaxSize()) {
+  Column(
+    modifier = Modifier
+      .fillMaxSize()
+      .background(MaterialTheme.colorScheme.background)
+  ) {
+    TopAppBar(title = { Text("Playlists") })
     Playlists(playlists = playlists)
-    if (playlists.loadState.refresh is LoadState.Loading) {
-      InitLoadingProgress()
-    }
-    if (playlists.loadState.refresh is LoadState.Error) {
-      RetryButton(Modifier.align(Alignment.Center)) {
-        playlists.retry()
-      }
+  }
+  LoadStates(loadState = playlists.loadState) {
+    playlists.retry()
+  }
+}
+
+@Composable
+private fun LoadStates(
+  loadState: CombinedLoadStates,
+  retry: () -> Unit
+) {
+  Box(
+    modifier = Modifier.fillMaxSize(),
+    contentAlignment = Alignment.Center
+  ) {
+    when (loadState.refresh) {
+      is LoadState.Loading -> CircularProgressIndicator()
+      is LoadState.Error -> RetryButton(onClick = retry)
+      else -> Unit
     }
   }
 }
 
 @Composable
-private fun RetryButton(
-  modifier: Modifier = Modifier,
-  onClick: () -> Unit,
-) {
-  Button(
-    onClick = onClick,
-    modifier = modifier
-  ) {
+private fun RetryButton(onClick: () -> Unit) {
+  Button(onClick = onClick) {
     Text(
       text = "Loading failed, tap to retry",
     )
@@ -69,18 +84,6 @@ private fun RetryButton(
 private fun PreviewRetryButton() {
   DanmusicTheme {
     RetryButton(onClick = {})
-  }
-}
-
-@Composable
-private fun InitLoadingProgress() {
-  Box(
-    modifier = Modifier
-      .fillMaxSize()
-      .background(Color.White),
-    contentAlignment = Alignment.Center,
-  ) {
-    CircularProgressIndicator()
   }
 }
 
