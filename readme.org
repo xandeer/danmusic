@@ -13,4 +13,4 @@ An Android music app write by compose.
 - [ ] Foreground play
 - [ ] Background play
 ** API
-Deployed [[https://github.com/xandeer/NeteaseCloudMusicApi][NeteaseCloudMusicApi]] on [[https://vercel.com/][vercel]].
+Deployed [[https://github.com/Binaryify/NeteaseCloudMusicApi][NeteaseCloudMusicApi]] on [[https://vercel.com/][vercel]].
