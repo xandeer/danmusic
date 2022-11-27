@@ -1,0 +1,16 @@
+* Heart Music
+An Android music app write by compose.
+** Dependencies
+- [[https://github.com/coil-kt/coil][Coil]]
+- [[https://developer.android.com/jetpack/compose][Compose]]
+- [[https://github.com/Kotlin/kotlinx.coroutines][Coroutines]]
+- [[https://github.com/InsertKoinIO/koin][Koin]]
+- [[https://developer.android.com/topic/libraries/architecture/paging/v3-overview][Paging]]
+- [[https://github.com/square/retrofit][Retrofit]]
+** Features
+- [X] Top playlist
+- [ ] Songs in top playlist
+- [ ] Foreground play
+- [ ] Background play
+** API
+Deployed [[https://github.com/xandeer/NeteaseCloudMusicApi][NeteaseCloudMusicApi]] on [[https://vercel.com/][vercel]].
