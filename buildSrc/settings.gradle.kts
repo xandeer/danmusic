@@ -1,4 +1,4 @@
-rootProject.name = "danmusic"
+rootProject.name = "heart-music"
 
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {

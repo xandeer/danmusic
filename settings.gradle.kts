@@ -1,5 +1,5 @@
-rootProject.name = "danmusic"
+rootProject.name = "heart-music"
 
 include(
-  "danmusic-app"
+  "heartmusic-app"
 )

@@ -1,5 +1,5 @@
-import danmusic.groupId
-import danmusic.versionName
+import heartmusic.groupId
+import heartmusic.versionName
 import kotlinx.validation.ApiValidationExtension
 
 buildscript {

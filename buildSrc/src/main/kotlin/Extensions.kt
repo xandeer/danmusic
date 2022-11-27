@@ -1,6 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package danmusic
+package heartmusic
 
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
