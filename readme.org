@@ -5,6 +5,7 @@ An Android music app write by compose.
 - [[https://developer.android.com/jetpack/compose][Compose]]
 - [[https://github.com/Kotlin/kotlinx.coroutines][Coroutines]]
 - [[https://github.com/InsertKoinIO/koin][Koin]]
+- [[https://square.github.io/leakcanary/][LeakCanary]]
 - [[https://developer.android.com/topic/libraries/architecture/paging/v3-overview][Paging]]
 - [[https://github.com/square/retrofit][Retrofit]]
 ** Features
