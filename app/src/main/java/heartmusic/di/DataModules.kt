@@ -1,8 +1,10 @@
 package heartmusic.di
 
 import heartmusic.data.source.HeartRepository
+import heartmusic.data.source.db.HeartPlaylistDb
 import heartmusic.data.source.remote.HeartRemoteDataSource
 import heartmusic.viewmodel.TopPlaylistViewModel
+import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -17,6 +19,8 @@ val DataModule = module {
       .build()
       .create(HeartRemoteDataSource::class.java)
   }
+
+  single { HeartPlaylistDb.create(androidContext(), false) }
 
   singleOf(::HeartRepository)
 
