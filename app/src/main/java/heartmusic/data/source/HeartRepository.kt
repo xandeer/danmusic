@@ -1,15 +1,32 @@
 package heartmusic.data.source
 
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import heartmusic.data.Playlist
+import heartmusic.data.source.db.HeartPlaylistDb
 import heartmusic.data.source.remote.HeartRemoteDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class HeartRepository(private val remote: HeartRemoteDataSource) {
-  private val timber by lazy { Timber.tag("DanRepository") }
+private const val ITEMS_PER_PAGE = 7
 
-  fun playListPagingSource() = TopPlaylistPagingSource(remote)
+class HeartRepository(
+  private val remote: HeartRemoteDataSource,
+  private val db: HeartPlaylistDb,
+) {
+  init {
+    Timber.tag("HeartRepository")
+  }
+
+  @OptIn(ExperimentalPagingApi::class)
+  val topPlaylistPager = Pager(
+    config = PagingConfig(pageSize = ITEMS_PER_PAGE),
+    remoteMediator = TopPlaylistRemoteMediator(db = db, remote = remote)
+  ) {
+    db.playlists().playlists()
+  }
 
   /**
    * Cached paging parameter, used to get the next page of data.
@@ -24,7 +41,7 @@ class HeartRepository(private val remote: HeartRemoteDataSource) {
    */
   suspend fun getTopPlaylists(size: Int = 1, anchor: Long = this.anchor) =
     withContext(Dispatchers.IO) {
-      timber.d("getTopPlaylists: size=$size, anchor=$anchor")
+      Timber.d("getTopPlaylists: size=$size, anchor=$anchor")
       try {
         remote.getTopPlaylists(size, anchor).playlists.also {
           it.lastOrNull()?.let { last ->
@@ -32,7 +49,7 @@ class HeartRepository(private val remote: HeartRemoteDataSource) {
           }
         }
       } catch (e: Exception) {
-        timber.e(e, "getTopPlaylists() failed")
+        Timber.e(e, "getTopPlaylists() failed")
         return@withContext emptyList<Playlist>()
       }
     }

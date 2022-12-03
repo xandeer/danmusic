@@ -2,7 +2,9 @@ import heartmusic.setupAppModule
 
 plugins {
   id("com.android.application")
+//  id("com.google.devtools.ksp") version libs.versions.ksp.get()
   kotlin("android")
+  kotlin("kapt")
 }
 
 setupAppModule(name = "heartmusic") {
@@ -41,6 +43,14 @@ dependencies {
 
   implementation(libs.retrofit)
   implementation(libs.retrofit.moshi)
+
+  implementation(libs.room.runtime)
+  annotationProcessor(libs.room.compiler)
+  kapt(libs.room.compiler)
+  // Something wrong with `@Transaction` in KSP
+//  ksp(libs.room.compiler)
+  implementation(libs.room.ktx)
+  implementation(libs.room.paging)
 
   implementation(libs.timber)
 
