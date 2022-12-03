@@ -44,6 +44,8 @@ dependencies {
 
   implementation(libs.timber)
 
+  debugImplementation(libs.leakCanary)
+
   testImplementation(libs.bundles.test.jvm)
 
   androidTestImplementation(libs.bundles.test.android)

@@ -11,6 +11,7 @@ koin = "3.2.2"
 koin-android = "3.3.0"
 koin-compose = "3.3.0"
 ktlint = "0.47.1"
+leak-canary = "2.10"
 paging = "3.1.1"
 paging-compose = "1.0.0-alpha17"
 retrofit = "2.9.0"
@@ -72,6 +73,8 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit" }
 
 ktlint = { module = "com.pinterest.ktlint:ktlint-core", version.ref = "ktlint" }
+
+leakCanary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leak-canary" }
 
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
