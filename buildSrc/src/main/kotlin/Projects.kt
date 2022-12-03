@@ -44,7 +44,7 @@ private inline fun <reified T : BaseExtension> Project.setupBaseModule(
     minSdk = project.minSdk
     targetSdk = project.targetSdk
 //    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    testInstrumentationRunner = "danmusic.app.InstrumentationTestRunner"
+    testInstrumentationRunner = "heartmusic.InstrumentationTestRunner"
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_1_8
