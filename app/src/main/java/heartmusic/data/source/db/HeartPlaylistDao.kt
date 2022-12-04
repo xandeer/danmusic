@@ -12,11 +12,14 @@ interface HeartPlaylistDao {
   @Query("SELECT * FROM playlists ORDER BY indexInResponse ASC")
   fun playlists(): PagingSource<Int, Playlist>
 
-  @Query("DELETE FROM playlists WHERE id = :id")
+  @Query("DELETE FROM playlists WHERE playlistId = :id")
   suspend fun deleteById(id: Long)
 
   @Query("SELECT * FROM playlists ORDER BY indexInResponse ASC")
   suspend fun getAll(): List<Playlist>
+
+  @Query("SELECT * FROM playlists WHERE playlistId = :id")
+  suspend fun getById(id: Long): Playlist?
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insertAll(playlists: List<Playlist>)

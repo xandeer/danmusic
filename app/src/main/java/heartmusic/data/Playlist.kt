@@ -1,17 +1,17 @@
 package heartmusic.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "playlists")
 data class Playlist(
-  @PrimaryKey
-  val id: Long,
+  @PrimaryKey @ColumnInfo(name = "playlistId") val id: Long,
   val name: String,
   val coverImgUrl: String,
-  val description: String,
-  val updateTime: Long
+  val description: String
 ) {
+  var updateTime: Long = 0
   /**
    * To be consistent backend order.
    */

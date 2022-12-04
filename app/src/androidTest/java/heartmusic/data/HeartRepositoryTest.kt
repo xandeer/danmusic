@@ -28,7 +28,7 @@ class HeartRepositoryTest {
     }
 
     runBlocking { repo.getTopPlaylists() }.let {
-      assertThat(first.first().id).isNotEqualTo(it.first().id)
+      assertThat(first.first().playlistId).isNotEqualTo(it.first().playlistId)
     }
   }
 }

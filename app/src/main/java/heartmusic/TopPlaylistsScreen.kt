@@ -1,6 +1,7 @@
 package heartmusic
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,7 +47,9 @@ internal fun TopPlaylistsScreen() {
       .background(MaterialTheme.colorScheme.background)
   ) {
     TopAppBar(title = { Text("Playlists") })
-    Playlists(playlists = playlists)
+    Playlists(playlists = playlists) { playlist ->
+      vm.currentPlaylist = playlist
+    }
   }
   LoadStates(loadState = playlists.loadState) {
     playlists.retry()
@@ -88,23 +91,30 @@ private fun PreviewRetryButton() {
 }
 
 @Composable
-private fun Playlists(playlists: LazyPagingItems<Playlist>) {
+private fun Playlists(
+  playlists: LazyPagingItems<Playlist>,
+  onItemClick: (Playlist) -> Unit = {}
+) {
   LazyColumn(
     verticalArrangement = Arrangement.spacedBy(8.dp),
     contentPadding = PaddingValues(16.dp, 8.dp)
   ) {
     items(playlists) {
       it?.let { playlist ->
-        PlayListItem(playlist = playlist)
+        PlayListItem(playlist = playlist, onClick = onItemClick)
       }
     }
   }
 }
 
 @Composable
-private fun PlayListItem(playlist: Playlist) {
+private fun PlayListItem(playlist: Playlist, onClick: (Playlist) -> Unit) {
   Row(
-    modifier = Modifier.fillMaxWidth(),
+    modifier = Modifier
+      .fillMaxWidth()
+      .clickable {
+        onClick(playlist)
+      },
     horizontalArrangement = Arrangement.spacedBy(16.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
@@ -140,9 +150,8 @@ private fun PreviewPlaylistItem() {
       id = 1,
       name = "Playlist 1",
       description = "Description 1",
-      coverImgUrl = "https://picsum.photos/200/300",
-      updateTime = 0
+      coverImgUrl = "https://picsum.photos/200/300"
     )
-    PlayListItem(playlist)
+    PlayListItem(playlist) {}
   }
 }
