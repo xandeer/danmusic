@@ -10,6 +10,8 @@ import androidx.room.Transaction
 
 private const val TOP_PLAYLIST = "top_playlist"
 
+private const val PLAYLIST_SONGS = "playlist_songs"
+
 @Dao
 interface CacheTimeDao {
   @Query("SELECT * FROM cache_time WHERE type = :type")
@@ -26,6 +28,16 @@ interface CacheTimeDao {
   @Transaction
   suspend fun updateTopPlaylistUpdateTime() {
     insert(CacheTime(TOP_PLAYLIST, System.currentTimeMillis()))
+  }
+
+  @Transaction
+  suspend fun updatePlaylistSongsUpdateTime(playlistId: Long) {
+    insert(CacheTime("$PLAYLIST_SONGS:$playlistId", System.currentTimeMillis()))
+  }
+
+  @Transaction
+  suspend fun lastPlaylistSongsUpdateTime(playlistId: Long): Long {
+    return cacheTimeByType("$PLAYLIST_SONGS:$playlistId")?.time ?: 0
   }
 }
 

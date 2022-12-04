@@ -8,9 +8,10 @@ An Android music app write by compose.
 - [[https://square.github.io/leakcanary/][LeakCanary]]
 - [[https://developer.android.com/topic/libraries/architecture/paging/v3-overview][Paging]]
 - [[https://github.com/square/retrofit][Retrofit]]
+- [[https://developer.android.com/training/data-storage/room][Room]]
 ** Features
 - [X] Top playlist
-- [ ] Songs in top playlist
+- [X] Songs in top playlist
 - [ ] Foreground play
 - [ ] Background play
 ** API
