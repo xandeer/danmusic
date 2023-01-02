@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -49,37 +50,46 @@ internal fun PlaylistSongsScreen() {
     val state = rememberLazyListState()
     val songs = vm.getSongs(playlistId = playlist.id).collectAsLazyPagingItems()
 
-
     BackHandler {
       vm.currentPlaylist = null
     }
 
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
       TopAppBar(title = { Text(playlist.name) })
-      Songs(songs = songs, state = state)
+      Songs(songs = songs, state = state) {
+        vm.playingSong = it
+        vm.songs = songs.itemSnapshotList.items
+      }
     }
   }
 }
 
 @Composable
-private fun Songs(songs: LazyPagingItems<PlaylistQuerySong>, state: LazyListState) {
+private fun Songs(
+  songs: LazyPagingItems<PlaylistQuerySong>,
+  state: LazyListState,
+  onItemClick: (PlaylistQuerySong) -> Unit = {}
+) {
   LazyColumn(
     state = state,
     contentPadding = PaddingValues(16.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp)
   ) {
     items(songs, key = { it.id }) { song ->
-      song?.let { SongItem(song = it) }
+      song?.let { SongItem(song = it, onClick = onItemClick) }
     }
   }
 }
 
 @Composable
 private fun SongItem(
-  song: PlaylistQuerySong
+  song: PlaylistQuerySong,
+  onClick: (PlaylistQuerySong) -> Unit = {}
 ) {
   Row(
-    Modifier.fillMaxWidth(),
+    Modifier
+      .fillMaxWidth()
+      .clickable { onClick(song) },
     horizontalArrangement = Arrangement.spacedBy(16.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {

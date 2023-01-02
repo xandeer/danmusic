@@ -32,6 +32,7 @@ data class PlaylistQuerySong(
   val name: String,
   val picUrl: String,
   val offset: Int,
+  val songUrl: String,
 )
 
 @Entity
@@ -66,4 +67,14 @@ data class Album(
 data class PlaylistSongsResponse(
   val code: Int,
   val songs: List<Song>,
+)
+
+data class SongUrlResponse(
+  val data: List<SongUrl>,
+)
+
+@Entity
+data class SongUrl(
+  @PrimaryKey @ColumnInfo(name = "songId") val id: Long,
+  val url: String,
 )

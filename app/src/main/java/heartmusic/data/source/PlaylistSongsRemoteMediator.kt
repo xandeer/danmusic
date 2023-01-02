@@ -7,6 +7,7 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import heartmusic.data.PlaylistQuerySong
 import heartmusic.data.PlaylistSong
+import heartmusic.data.SongUrl
 import heartmusic.data.source.db.HeartPlaylistDb
 import heartmusic.data.source.remote.HeartRemoteDataSource
 import timber.log.Timber
@@ -51,7 +52,7 @@ class PlaylistSongsRemoteMediator(
             ?: return MediatorResult.Success(endOfPaginationReached = true)
         }
       }
-      val songs = remote.getSongsOfPlaylist(
+      var songs = remote.getSongsOfPlaylist(
         id = query,
         size = when (loadType) {
           LoadType.REFRESH -> state.config.initialLoadSize
@@ -59,6 +60,20 @@ class PlaylistSongsRemoteMediator(
         },
         offset = offset
       ).songs
+
+      @Suppress("SENSELESS_COMPARISON")
+      val songUrls = songs.map {
+        remote.getSongUrl(it.id)
+      }.map {
+        it.data[0]
+      }.map {
+        SongUrl(it.id, it.url)
+      }.filter {
+        it.url != null
+      }
+
+      val validIds = songUrls.map { it.id }
+      songs = songs.filter { it.id in validIds }
 
       Timber.d("type: $loadType, size: ${songs.size}, offset: $offset")
 
@@ -69,6 +84,7 @@ class PlaylistSongsRemoteMediator(
         }
 
         songsDao.insertSongs(songs)
+        songsDao.insertSongUrls(songUrls)
         songs.mapIndexed { i, it ->
           PlaylistSong(
             playlistId = query,

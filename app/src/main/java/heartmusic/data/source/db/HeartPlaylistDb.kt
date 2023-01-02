@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import heartmusic.data.Playlist
 import heartmusic.data.PlaylistSong
 import heartmusic.data.Song
+import heartmusic.data.SongUrl
 
 @Database(
   entities = [
@@ -14,6 +15,7 @@ import heartmusic.data.Song
     CacheTime::class,
     Song::class,
     PlaylistSong::class,
+    SongUrl::class,
   ],
   version = 1,
   exportSchema = false
