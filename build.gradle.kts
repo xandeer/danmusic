@@ -65,3 +65,7 @@ allprojects {
     }
   }
 }
+
+tasks.register("clean") {
+  delete(rootProject.buildDir)
+}

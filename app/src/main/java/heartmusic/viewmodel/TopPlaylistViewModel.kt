@@ -9,6 +9,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import heartmusic.data.Playlist
 import heartmusic.data.PlaylistQuerySong
+import heartmusic.data.SongUrl
 import heartmusic.data.source.HeartRepository
 import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
@@ -32,4 +33,7 @@ class TopPlaylistViewModel constructor(
   }
 
   var currentPlaylist by mutableStateOf<Playlist?>(null)
+
+  var songs by mutableStateOf<List<PlaylistQuerySong>>(emptyList())
+  var playingSong by mutableStateOf<PlaylistQuerySong?>(null)
 }
