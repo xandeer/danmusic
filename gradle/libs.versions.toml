@@ -6,6 +6,7 @@ coil = "2.2.2"
 compose = "1.3.1"
 compose-bom = "2022.10.00"
 composeCompiler = "1.3.2"
+composeConstraintLayout = "1.0.1"
 coroutines = "1.6.4"
 gradlePluginKotlin = "1.7.20"
 koin = "3.2.2"
@@ -56,6 +57,7 @@ coil = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
+compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "composeConstraintLayout" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 compose-preview = { module = "androidx.compose.ui:ui-tooling-preview" }

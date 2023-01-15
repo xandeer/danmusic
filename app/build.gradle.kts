@@ -32,6 +32,7 @@ setupAppModule(name = "heartmusic") {
 dependencies {
   implementation(platform(libs.compose.bom))
   implementation(libs.bundles.compose)
+  implementation(libs.compose.constraintlayout)
 
   implementation(libs.coil)
   implementation(libs.coil.compose)

@@ -1,5 +1,6 @@
 package heartmusic.data
 
+import androidx.media3.common.MediaItem
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -34,6 +35,8 @@ data class PlaylistQuerySong(
   val offset: Int,
   val songUrl: String,
 )
+
+fun PlaylistQuerySong.asMediaItem() = MediaItem.fromUri(songUrl)
 
 @Entity
 data class Song(

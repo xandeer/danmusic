@@ -97,7 +97,7 @@ private fun Playlists(
 ) {
   LazyColumn(
     verticalArrangement = Arrangement.spacedBy(8.dp),
-    contentPadding = PaddingValues(16.dp, 8.dp)
+    contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 64.dp)
   ) {
     items(playlists) {
       it?.let { playlist ->

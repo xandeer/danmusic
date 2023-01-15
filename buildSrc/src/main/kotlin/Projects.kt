@@ -8,6 +8,7 @@ import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
 fun Project.setupLibraryModule(
@@ -47,11 +48,11 @@ private inline fun <reified T : BaseExtension> Project.setupBaseModule(
     testInstrumentationRunner = "heartmusic.InstrumentationTestRunner"
   }
   compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = project.jvmTarget
+    targetCompatibility = project.jvmTarget
   }
   kotlinOptions {
-    jvmTarget = "1.8"
+    jvmTarget = project.jvmTarget.toString()
     allWarningsAsErrors = true
 
     val arguments = mutableListOf(
