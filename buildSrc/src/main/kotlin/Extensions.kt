@@ -2,6 +2,7 @@
 
 package heartmusic
 
+import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -16,6 +17,10 @@ val Project.targetSdk: Int
 
 val Project.compileSdk: Int
   get() = intProperty("compileSdk")
+
+// Remember to update `kotlinDslPluginOptions.jvmTarget` in buildSrc/build.gradle.kts.
+val Project.jvmTarget: JavaVersion
+  get() = JavaVersion.VERSION_11
 
 val Project.groupId: String
   get() = stringProperty("GROUP")

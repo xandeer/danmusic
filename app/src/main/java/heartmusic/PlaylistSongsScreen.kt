@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +34,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
 import heartmusic.data.PlaylistQuerySong
+import heartmusic.viewmodel.PlayerViewModel
 import heartmusic.viewmodel.TopPlaylistViewModel
 import org.koin.androidx.compose.getViewModel
 
@@ -40,14 +42,15 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 internal fun PlaylistSongsScreen() {
   val vm: TopPlaylistViewModel = getViewModel()
+  val playerVm: PlayerViewModel = getViewModel()
   AnimatedVisibility(
     visible = vm.currentPlaylist != null,
     enter = slideInHorizontally(initialOffsetX = { it }),
     exit = slideOutHorizontally(targetOffsetX = { it }),
     modifier = Modifier.fillMaxSize()
   ) {
-    val playlist = remember { vm.currentPlaylist!! }
     val state = rememberLazyListState()
+    val playlist = remember { vm.currentPlaylist!! }
     val songs = vm.getSongs(playlistId = playlist.id).collectAsLazyPagingItems()
 
     BackHandler {
@@ -57,9 +60,18 @@ internal fun PlaylistSongsScreen() {
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
       TopAppBar(title = { Text(playlist.name) })
       Songs(songs = songs, state = state) {
-        vm.playingSong = it
-        vm.songs = songs.itemSnapshotList.items
+        playerVm.play(vm.songs.indexOf(it))
       }
+    }
+
+    LaunchedEffect(key1 = songs.itemSnapshotList.items) {
+      vm.songs = songs.itemSnapshotList.items
+    }
+  }
+
+  LaunchedEffect(key1 = playerVm.currentIndex, key2 = vm.songs) {
+    if (playerVm.currentIndex in 0 until vm.songs.size) {
+      vm.playingSong = vm.songs[playerVm.currentIndex]
     }
   }
 }
@@ -72,7 +84,7 @@ private fun Songs(
 ) {
   LazyColumn(
     state = state,
-    contentPadding = PaddingValues(16.dp),
+    contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 64.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp)
   ) {
     items(songs, key = { it.id }) { song ->
