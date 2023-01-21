@@ -5,11 +5,10 @@ import com.android.build.api.dsl.Lint
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
-import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
-import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 
 fun Project.setupLibraryModule(
   name: String?,
@@ -40,7 +39,7 @@ private inline fun <reified T : BaseExtension> Project.setupBaseModule(
   crossinline block: T.() -> Unit = {}
 ) = extensions.configure<T>("android") {
   namespace = name
-  compileSdkVersion(project.compileSdk)
+  compileSdkVersion(compileSdk)
   defaultConfig {
     minSdk = project.minSdk
     targetSdk = project.targetSdk
@@ -48,11 +47,13 @@ private inline fun <reified T : BaseExtension> Project.setupBaseModule(
     testInstrumentationRunner = "heartmusic.InstrumentationTestRunner"
   }
   compileOptions {
-    sourceCompatibility = project.jvmTarget
-    targetCompatibility = project.jvmTarget
+    sourceCompatibility = jvmTargetVersion
+    targetCompatibility = jvmTargetVersion
   }
+  // affects kapt
+  kotlinExtension.jvmToolchain(jvmTargetVersion.toString().toInt())
   kotlinOptions {
-    jvmTarget = project.jvmTarget.toString()
+//    jvmTarget = project.jvmTargetVersion.toString()
     allWarningsAsErrors = true
 
     val arguments = mutableListOf(
@@ -64,6 +65,8 @@ private inline fun <reified T : BaseExtension> Project.setupBaseModule(
       "-Xno-call-assertions",
       "-Xno-param-assertions",
       "-Xno-receiver-assertions",
+      // kapt currently doesn't support experimental K2 compiler
+//      "-Xuse-k2",
     )
 //    if (project.name != "coil-test") {
 //      arguments += "-opt-in=coil.annotation.ExperimentalCoilApi"
