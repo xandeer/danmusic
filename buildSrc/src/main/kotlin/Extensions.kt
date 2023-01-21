@@ -19,8 +19,8 @@ val Project.compileSdk: Int
   get() = intProperty("compileSdk")
 
 // Remember to update `kotlinDslPluginOptions.jvmTarget` in buildSrc/build.gradle.kts.
-val Project.jvmTarget: JavaVersion
-  get() = JavaVersion.VERSION_11
+val Project.jvmTargetVersion: JavaVersion
+  get() = JavaVersion.VERSION_17
 
 val Project.groupId: String
   get() = stringProperty("GROUP")
