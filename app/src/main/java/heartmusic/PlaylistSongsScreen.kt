@@ -60,18 +60,12 @@ internal fun PlaylistSongsScreen() {
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
       TopAppBar(title = { Text(playlist.name) })
       Songs(songs = songs, state = state) {
-        playerVm.play(vm.songs.indexOf(it))
+        playerVm.play(playlist.id, vm.songs, it)
       }
     }
 
     LaunchedEffect(key1 = songs.itemSnapshotList.items) {
       vm.songs = songs.itemSnapshotList.items
-    }
-  }
-
-  LaunchedEffect(key1 = playerVm.currentIndex, key2 = vm.songs) {
-    if (playerVm.currentIndex in 0 until vm.songs.size) {
-      vm.playingSong = vm.songs[playerVm.currentIndex]
     }
   }
 }

@@ -10,6 +10,12 @@ import heartmusic.data.PlaylistSong
 import heartmusic.data.SongUrl
 import heartmusic.data.source.db.HeartPlaylistDb
 import heartmusic.data.source.remote.HeartRemoteDataSource
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flattenMerge
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -39,6 +45,7 @@ class PlaylistSongsRemoteMediator(
     }
   }
 
+  @OptIn(FlowPreview::class)
   override suspend fun load(
     loadType: LoadType,
     state: PagingState<Int, PlaylistQuerySong>
@@ -62,15 +69,15 @@ class PlaylistSongsRemoteMediator(
       ).songs
 
       @Suppress("SENSELESS_COMPARISON")
-      val songUrls = songs.map {
-        remote.getSongUrl(it.id)
-      }.map {
-        it.data[0]
-      }.map {
+      val songUrls = flow { songs.map { emit(it) } }.map {
+        flow {
+          emit(remote.getSongUrl(it.id))
+        }
+      }.flattenMerge(state.config.pageSize).map { it.data[0] }.map {
         SongUrl(it.id, it.url)
       }.filter {
         it.url != null
-      }
+      }.toList()
 
       val validIds = songUrls.map { it.id }
       songs = songs.filter { it.id in validIds }

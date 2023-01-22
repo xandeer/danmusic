@@ -34,6 +34,9 @@ class TopPlaylistViewModel constructor(
 
   var currentPlaylist by mutableStateOf<Playlist?>(null)
 
+  /**
+   * The list of songs in the current playlist screen, may be not the same
+   * as the list of songs in the current playing playlist.
+   */
   var songs by mutableStateOf<List<PlaylistQuerySong>>(emptyList())
-  var playingSong by mutableStateOf<PlaylistQuerySong?>(null)
 }
