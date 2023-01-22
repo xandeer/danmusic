@@ -81,7 +81,8 @@ private fun Songs(
     contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 64.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp)
   ) {
-    items(songs, key = { it.id }) { song ->
+    // todo: why there are duplicated items with the same id?
+    items(songs, key = { "${it.id}-$it" }) { song ->
       song?.let { SongItem(song = it, onClick = onItemClick) }
     }
   }
