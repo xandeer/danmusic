@@ -2,6 +2,11 @@ package heartmusic
 
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -25,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,7 +63,7 @@ internal fun PlayerBar(modifier: Modifier = Modifier) {
   }
 
   AnimatedVisibility(
-    modifier = modifier.shadow(4.dp),
+    modifier = modifier,
     visible = playingSong != null,
     enter = slideInVertically(initialOffsetY = { it }),
     exit = slideOutVertically(targetOffsetY = { it })
@@ -114,11 +120,34 @@ private fun AudioController(
         .padding(horizontal = 16.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
+      var rotation by remember { mutableStateOf(0f) }
+      LaunchedEffect(key1 = imgUrl) {
+        rotation = 0f
+      }
+      if (isPlaying) {
+        LaunchedEffect(Unit) {
+          animate(
+            initialValue = rotation,
+            targetValue = rotation + 360,
+            animationSpec = infiniteRepeatable(
+              animation = tween(
+                durationMillis = 10000,
+                easing = LinearEasing
+              ),
+              repeatMode = RepeatMode.Restart
+            )
+          ) { value, _ ->
+            rotation = value
+          }
+        }
+      }
+
       AsyncImage(
         model = imgUrl,
         modifier = Modifier
           .size(36.dp)
-          .clip(CircleShape),
+          .clip(CircleShape)
+          .rotate(rotation),
         contentDescription = title
       )
       Column(
