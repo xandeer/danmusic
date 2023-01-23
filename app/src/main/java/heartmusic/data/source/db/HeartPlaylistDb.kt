@@ -8,6 +8,7 @@ import heartmusic.data.Playlist
 import heartmusic.data.PlaylistSong
 import heartmusic.data.Song
 import heartmusic.data.SongUrl
+import java.util.concurrent.TimeUnit
 
 @Database(
   entities = [
@@ -40,3 +41,5 @@ abstract class HeartPlaylistDb : RoomDatabase() {
 
   abstract fun cacheTime(): CacheTimeDao
 }
+
+val dbCacheTimeout = TimeUnit.MILLISECONDS.convert(10, TimeUnit.MINUTES)

@@ -1,13 +1,30 @@
 package heartmusic.viewmodel
 
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.Player.Listener
+import androidx.media3.exoplayer.ExoPlayer
 import heartmusic.data.PlaylistQuerySong
+import heartmusic.data.asMediaItems
+import heartmusic.logger
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.channels.ticker
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent.get
+
+private val logger get() = logger("PlayerViewModel")
 
 class PlayerViewModel : ViewModel() {
+  private val player: ExoPlayer = get(ExoPlayer::class.java)
+
   var isPlaying by mutableStateOf(false)
     private set
 
@@ -17,37 +34,51 @@ class PlayerViewModel : ViewModel() {
   var playlistId by mutableStateOf(-1L)
     private set
 
-  var songs = emptyList<PlaylistQuerySong>()
+  var songs by mutableStateOf(emptyList<PlaylistQuerySong>())
     private set
 
-  val playingSong by derivedStateOf { songs.getOrNull(currentIndex) }
-
-  fun play(playlist: Long, songs: List<PlaylistQuerySong>, song: PlaylistQuerySong) {
-    this.songs = songs
-    playlistId = playlist
+  fun play(playlistId: Long, songs: List<PlaylistQuerySong>, song: PlaylistQuerySong) {
+    resetPlaylist(playlistId, songs)
     isPlaying = true
     currentIndex = songs.indexOf(song)
+    startPositionTicker()
   }
 
-  fun appendSongs(songs: List<PlaylistQuerySong>) {
-    this.songs = this.songs + songs
+  private fun resetPlaylist(id: Long, list: List<PlaylistQuerySong>) {
+    playlistId = id
+    player.clearMediaItems()
+    songs = list
+    player.addMediaItems(songs.asMediaItems())
+    player.prepare()
   }
 
-  fun next() {
-    require(currentIndex < songs.size - 1) { "No next song" }
-    currentIndex = currentIndex.inc()
+  private var isPositionTickerStarted = false
+  @OptIn(ObsoleteCoroutinesApi::class)
+  private fun startPositionTicker() {
+    if (isPositionTickerStarted) return
+    isPositionTickerStarted = true
+    viewModelScope.launch {
+      ticker(30).consumeAsFlow().collect {
+        (player.currentPosition to player.duration).also { (position, duration) ->
+          if (position >= 0 && duration > 0) {
+            updatePosition(position, duration)
+          }
+        }
+      }
+    }
   }
 
-  fun updateByPosition(index: Int) {
-    currentIndex = index
-  }
-
-  fun pause() {
-    isPlaying = false
+  fun appendSongs(list: List<PlaylistQuerySong>) {
+    songs = songs + list
   }
 
   fun toggle() {
     isPlaying = !isPlaying
+    if (isPlaying) {
+      player.play()
+    } else {
+      player.pause()
+    }
   }
 
   var positionMs by mutableStateOf(0L)
@@ -55,8 +86,52 @@ class PlayerViewModel : ViewModel() {
   var durationMs by mutableStateOf(0L)
     private set
 
-  fun updatePosition(position: Long, duration: Long) {
+  private fun updatePosition(position: Long, duration: Long) {
     positionMs = position
     durationMs = duration
+  }
+
+  private val listener = object : Listener {
+    override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+      logger.d("onMediaItemTransition: ${mediaItem?.mediaId}, ${mediaItem?.mediaMetadata?.title}")
+    }
+
+    override fun onPositionDiscontinuity(
+      oldPosition: Player.PositionInfo,
+      newPosition: Player.PositionInfo,
+      reason: Int
+    ) {
+//      logger.d("onPositionDiscontinuity: ${newPosition.mediaItemIndex}, ${newPosition.positionMs}/${newPosition.contentPositionMs}")
+      updateByPosition(newPosition.mediaItemIndex)
+    }
+  }
+
+  private fun updateByPosition(index: Int) {
+    currentIndex = index
+  }
+
+  private fun observeSeek() {
+    val nextIndex = snapshotFlow { currentIndex }
+      .combine(snapshotFlow { playlistId }) { index, _ ->
+        index
+      }
+    viewModelScope.launch {
+      nextIndex.collect {
+        if (it in songs.indices) {
+          logger.d("seekTo: $it")
+          player.seekTo(it, 0L)
+        }
+      }
+    }
+  }
+
+  init {
+    player.addListener(listener)
+    observeSeek()
+  }
+
+  override fun onCleared() {
+    super.onCleared()
+    player.removeListener(listener)
   }
 }

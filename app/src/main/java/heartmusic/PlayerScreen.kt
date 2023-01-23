@@ -25,8 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,34 +38,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.common.Player.Listener
 import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
-import heartmusic.data.PlaylistQuerySong
-import heartmusic.data.asMediaItem
 import heartmusic.ui.theme.HeartMusicTheme
 import heartmusic.viewmodel.PlayerViewModel
-import heartmusic.viewmodel.TopPlaylistViewModel
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.channels.ticker
-import kotlinx.coroutines.flow.consumeAsFlow
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
-private const val TAG = "PlayerBar"
+private val logger get() = logger("PlayerBar")
 
-private val timber get() = Timber.tag(TAG)
-
-@OptIn(ObsoleteCoroutinesApi::class)
 @Composable
 internal fun PlayerBar(modifier: Modifier = Modifier) {
-  val vm: TopPlaylistViewModel = getViewModel()
   val playerVm: PlayerViewModel = getViewModel()
-  val player: ExoPlayer = get()
 
   val playingSong by remember {
     derivedStateOf { playerVm.songs.getOrNull(playerVm.currentIndex) }
@@ -79,11 +62,7 @@ internal fun PlayerBar(modifier: Modifier = Modifier) {
     enter = slideInVertically(initialOffsetY = { it }),
     exit = slideOutVertically(targetOffsetY = { it })
   ) {
-    val isNextEnabled by remember(playerVm.currentIndex, vm.songs) {
-      derivedStateOf {
-        playerVm.currentIndex.inc() < vm.songs.size
-      }
-    }
+    val player: ExoPlayer = get()
     playingSong?.also {
       AudioController(
         imgUrl = it.picUrl,
@@ -92,77 +71,11 @@ internal fun PlayerBar(modifier: Modifier = Modifier) {
         position = playerVm.positionMs,
         duration = playerVm.durationMs,
         onTogglePlaying = playerVm::toggle,
-        isNextEnabled = isNextEnabled,
-        onNext = {
-          playerVm.next()
-        }
+        isNextEnabled = player.hasNextMediaItem(),
+        onNext = player::seekToNext
       )
     }
   }
-
-  LaunchedEffect(key1 = playerVm.playlistId) {
-    player.clearMediaItems()
-    playerVm.playingSong?.asMediaItem()
-    player.addMediaItems(playerVm.songs.asMediaItems())
-    player.prepare()
-  }
-
-  LaunchedEffect(key1 = vm.songs) {
-    if (vm.currentPlaylist?.id == playerVm.playlistId) {
-      vm.songs.filter { it !in playerVm.songs }
-        .also {
-          playerVm.appendSongs(it)
-          player.addMediaItems(it.asMediaItems())
-        }
-    }
-  }
-
-  LaunchedEffect(key1 = playerVm.currentIndex, key2 = playerVm.playlistId) {
-    if (playerVm.currentIndex in 0 until vm.songs.size) {
-      timber.d("seekTo: ${playerVm.currentIndex}")
-      player.seekTo(playerVm.currentIndex, 0L)
-    }
-  }
-
-  LaunchedEffect(key1 = playerVm.isPlaying) {
-    if (playerVm.isPlaying) {
-      player.play()
-      ticker(30).consumeAsFlow().collect {
-        (player.currentPosition to player.duration).also { (position, duration) ->
-          if (position > 0 && duration > 0) {
-            playerVm.updatePosition(position, duration)
-          }
-        }
-      }
-    } else {
-      player.pause()
-    }
-  }
-
-  DisposableEffect(Unit) {
-    player.addListener(object : Listener {
-      override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-        timber.d("onMediaItemTransition: ${mediaItem?.mediaId}, ${mediaItem?.mediaMetadata?.title}")
-      }
-
-      override fun onPositionDiscontinuity(
-        oldPosition: Player.PositionInfo,
-        newPosition: Player.PositionInfo,
-        reason: Int
-      ) {
-        timber.d("onPositionDiscontinuity: ${newPosition.mediaItemIndex}, ${newPosition.positionMs}/${newPosition.contentPositionMs}")
-        playerVm.updateByPosition(newPosition.mediaItemIndex)
-      }
-    })
-    onDispose {
-      timber.d("player dispose")
-      player.release()
-    }
-  }
-}
-
-private fun List<PlaylistQuerySong>.asMediaItems(): List<MediaItem> {
-  return map { it.asMediaItem() }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -190,7 +103,7 @@ private fun AudioController(
         .zIndex(1f),
       value = position.toFloat(),
       onValueChange = {
-        timber.d("onValueChange: $it")
+        logger.d("onValueChange: $it")
       },
       valueRange = 0f..duration.toFloat(),
       thumb = {},

@@ -9,15 +9,17 @@ import heartmusic.data.PlaylistQuerySong
 import heartmusic.data.PlaylistSong
 import heartmusic.data.SongUrl
 import heartmusic.data.source.db.HeartPlaylistDb
+import heartmusic.data.source.db.dbCacheTimeout
 import heartmusic.data.source.remote.HeartRemoteDataSource
+import heartmusic.logger
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
-import timber.log.Timber
-import java.util.concurrent.TimeUnit
+
+private val logger get() = logger("PlaylistSongsMediator")
 
 @OptIn(ExperimentalPagingApi::class)
 class PlaylistSongsRemoteMediator(
@@ -28,19 +30,14 @@ class PlaylistSongsRemoteMediator(
   private val songsDao = db.playlistSongs()
   private val cacheTimeDao = db.cacheTime()
 
-  init {
-    Timber.tag("PlaylistSongsMediator")
-  }
-
   override suspend fun initialize(): InitializeAction {
-    val cacheTimeout = TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS)
     val lastUpdated = db.withTransaction {
       cacheTimeDao.lastPlaylistSongsUpdateTime(query)
     }
-    return if (System.currentTimeMillis() - lastUpdated > cacheTimeout) {
+    return if (System.currentTimeMillis() - lastUpdated > dbCacheTimeout) {
       InitializeAction.LAUNCH_INITIAL_REFRESH
     } else {
-      Timber.i("Skip initial refresh.")
+      logger.i("Skip initial refresh.")
       InitializeAction.SKIP_INITIAL_REFRESH
     }
   }
@@ -82,7 +79,7 @@ class PlaylistSongsRemoteMediator(
       val validIds = songUrls.map { it.id }
       songs = songs.filter { it.id in validIds }
 
-      Timber.d("type: $loadType, size: ${songs.size}, offset: $offset")
+      logger.d("type: $loadType, size: ${songs.size}, offset: $offset")
 
       db.withTransaction {
         if (loadType == LoadType.REFRESH) {
@@ -104,7 +101,7 @@ class PlaylistSongsRemoteMediator(
       }
       MediatorResult.Success(endOfPaginationReached = songs.isEmpty())
     } catch (e: Exception) {
-      Timber.e(e, "load failed")
+      logger.e(e, "load failed")
       MediatorResult.Error(e)
     }
   }

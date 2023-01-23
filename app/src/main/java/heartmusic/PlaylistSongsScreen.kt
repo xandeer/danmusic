@@ -29,13 +29,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
 import heartmusic.data.PlaylistQuerySong
+import heartmusic.data.asMediaItems
 import heartmusic.viewmodel.PlayerViewModel
 import heartmusic.viewmodel.TopPlaylistViewModel
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,8 +67,17 @@ internal fun PlaylistSongsScreen() {
       }
     }
 
+    val player: ExoPlayer = get()
     LaunchedEffect(key1 = songs.itemSnapshotList.items) {
       vm.songs = songs.itemSnapshotList.items
+
+      if (vm.currentPlaylist?.id == playerVm.playlistId) {
+        vm.songs.filter { it !in playerVm.songs }
+          .also {
+            playerVm.appendSongs(it)
+            player.addMediaItems(it.asMediaItems())
+          }
+      }
     }
   }
 }
