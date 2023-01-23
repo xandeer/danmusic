@@ -9,18 +9,15 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import heartmusic.data.Playlist
 import heartmusic.data.PlaylistQuerySong
-import heartmusic.data.SongUrl
 import heartmusic.data.source.HeartRepository
+import heartmusic.logger
 import kotlinx.coroutines.flow.Flow
-import timber.log.Timber
+
+private val logger get() = logger("TopPlaylistViewModel")
 
 class TopPlaylistViewModel constructor(
   private val repository: HeartRepository
 ) : ViewModel() {
-  init {
-    Timber.tag("HeartViewModel")
-  }
-
   val playlists = repository.topPlaylistPager.flow.cachedIn(viewModelScope)
 
   private val playlistSongs = mutableMapOf<Long, Flow<PagingData<PlaylistQuerySong>>>()
@@ -28,7 +25,7 @@ class TopPlaylistViewModel constructor(
   fun getSongs(playlistId: Long) = playlistSongs.getOrPut(playlistId) {
     repository.getPlaylistSongs(playlistId).flow.cachedIn(viewModelScope)
       .also {
-        Timber.i("getSongs: $playlistId")
+        logger.i("getSongs: $playlistId")
       }
   }
 

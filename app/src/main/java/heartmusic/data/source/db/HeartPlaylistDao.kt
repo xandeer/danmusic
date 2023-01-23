@@ -24,7 +24,7 @@ interface HeartPlaylistDao {
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insertAll(playlists: List<Playlist>)
 
-  @Query("DELETE FROM playlists")
+  @Query("delete from playlists")
   suspend fun deleteAll()
 
   @Query("SELECT MAX(indexInResponse) + 1 FROM playlists")

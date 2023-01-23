@@ -43,4 +43,7 @@ interface PlaylistSongsDao {
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insertSongUrls(songs: List<SongUrl>)
+
+  @Query("delete from playlistsong")
+  suspend fun deleteAllPlaylistSongs()
 }

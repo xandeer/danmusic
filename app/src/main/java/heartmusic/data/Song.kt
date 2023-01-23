@@ -49,6 +49,10 @@ fun PlaylistQuerySong.asMediaItem() = MediaItem.Builder().setUri(songUrl)
   )
   .build()
 
+fun List<PlaylistQuerySong>.asMediaItems(): List<MediaItem> {
+  return map { it.asMediaItem() }
+}
+
 @Entity
 data class Song(
   @PrimaryKey @ColumnInfo(name = "songId") val id: Long,

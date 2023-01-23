@@ -7,9 +7,11 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import heartmusic.data.Playlist
 import heartmusic.data.source.db.HeartPlaylistDb
+import heartmusic.data.source.db.dbCacheTimeout
 import heartmusic.data.source.remote.HeartRemoteDataSource
-import timber.log.Timber
-import java.util.concurrent.TimeUnit
+import heartmusic.logger
+
+private val logger get() = logger("HeartRemoteMediator")
 
 @OptIn(ExperimentalPagingApi::class)
 class TopPlaylistRemoteMediator(
@@ -19,19 +21,14 @@ class TopPlaylistRemoteMediator(
   private val playlistDao = db.playlists()
   private val cacheTimeDao = db.cacheTime()
 
-  init {
-    Timber.tag("HeartRemoteMediator")
-  }
-
   override suspend fun initialize(): InitializeAction {
-    val cacheTimeout = TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS)
     val lastUpdated = db.withTransaction {
       cacheTimeDao.lastTopPlaylistUpdateTime()
     }
-    return if (System.currentTimeMillis() - lastUpdated > cacheTimeout) {
+    return if (System.currentTimeMillis() - lastUpdated > dbCacheTimeout) {
       InitializeAction.LAUNCH_INITIAL_REFRESH
     } else {
-      Timber.i("Skip initial refresh.")
+      logger.i("Skip initial refresh.")
       InitializeAction.SKIP_INITIAL_REFRESH
     }
   }
@@ -57,10 +54,12 @@ class TopPlaylistRemoteMediator(
         anchor = loadAnchor
       ).playlists
 
-      Timber.d("type: $loadType, size: ${playlists.size}, anchor: $loadAnchor")
+      logger.d("type: $loadType, size: ${playlists.size}, anchor: $loadAnchor")
 
       db.withTransaction {
         if (loadType == LoadType.REFRESH) {
+          // songs depends on playlists as foreign keys, so delete songs first
+          db.playlistSongs().deleteAllPlaylistSongs()
           playlistDao.deleteAll()
 
           cacheTimeDao.updateTopPlaylistUpdateTime()
@@ -75,7 +74,7 @@ class TopPlaylistRemoteMediator(
       }
       MediatorResult.Success(endOfPaginationReached = playlists.isEmpty())
     } catch (e: Exception) {
-      Timber.e(e, "load failed")
+      logger.e(e, "load failed")
       MediatorResult.Error(e)
     }
   }
