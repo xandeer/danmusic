@@ -38,9 +38,14 @@ class PlayerViewModel : ViewModel() {
     private set
 
   fun play(playlistId: Long, songs: List<PlaylistQuerySong>, song: PlaylistQuerySong) {
+    val index = songs.indexOf(song)
+    if (playlistId == this.playlistId && index == currentIndex) {
+      if (!isPlaying) player.play()
+      return
+    }
+
     resetPlaylist(playlistId, songs)
-    isPlaying = true
-    currentIndex = songs.indexOf(song)
+    currentIndex = index
     startPositionTicker()
   }
 
@@ -50,9 +55,11 @@ class PlayerViewModel : ViewModel() {
     songs = list
     player.addMediaItems(songs.asMediaItems())
     player.prepare()
+    player.play()
   }
 
   private var isPositionTickerStarted = false
+
   @OptIn(ObsoleteCoroutinesApi::class)
   private fun startPositionTicker() {
     if (isPositionTickerStarted) return
@@ -73,11 +80,10 @@ class PlayerViewModel : ViewModel() {
   }
 
   fun toggle() {
-    isPlaying = !isPlaying
-    if (isPlaying) {
-      player.play()
-    } else {
+    if (player.isPlaying) {
       player.pause()
+    } else {
+      player.play()
     }
   }
 
@@ -94,6 +100,11 @@ class PlayerViewModel : ViewModel() {
   private val listener = object : Listener {
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
       logger.d("onMediaItemTransition: ${mediaItem?.mediaId}, ${mediaItem?.mediaMetadata?.title}")
+    }
+
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+      super.onIsPlayingChanged(isPlaying)
+      this@PlayerViewModel.isPlaying = isPlaying
     }
 
     override fun onPositionDiscontinuity(
@@ -120,6 +131,7 @@ class PlayerViewModel : ViewModel() {
         if (it in songs.indices) {
           logger.d("seekTo: $it")
           player.seekTo(it, 0L)
+          player.play()
         }
       }
     }

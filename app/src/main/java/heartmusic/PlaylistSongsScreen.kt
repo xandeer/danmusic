@@ -45,13 +45,13 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 internal fun PlaylistSongsScreen() {
   val vm: TopPlaylistViewModel = getViewModel()
-  val playerVm: PlayerViewModel = getViewModel()
   AnimatedVisibility(
     visible = vm.currentPlaylist != null,
     enter = slideInHorizontally(initialOffsetX = { it }),
     exit = slideOutHorizontally(targetOffsetX = { it }),
     modifier = Modifier.fillMaxSize()
   ) {
+    val playerVm: PlayerViewModel = getViewModel()
     val state = rememberLazyListState()
     val playlist = remember { vm.currentPlaylist!! }
     val songs = vm.getSongs(playlistId = playlist.id).collectAsLazyPagingItems()
@@ -108,6 +108,7 @@ private fun SongItem(
   Row(
     Modifier
       .fillMaxWidth()
+      .clip(MaterialTheme.shapes.medium)
       .clickable { onClick(song) },
     horizontalArrangement = Arrangement.spacedBy(16.dp),
     verticalAlignment = Alignment.CenterVertically
