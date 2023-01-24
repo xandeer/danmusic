@@ -42,4 +42,4 @@ abstract class HeartPlaylistDb : RoomDatabase() {
   abstract fun cacheTime(): CacheTimeDao
 }
 
-val dbCacheTimeout = TimeUnit.MILLISECONDS.convert(10, TimeUnit.MINUTES)
+val dbCacheTimeout = TimeUnit.MILLISECONDS.convert(100, TimeUnit.MINUTES)

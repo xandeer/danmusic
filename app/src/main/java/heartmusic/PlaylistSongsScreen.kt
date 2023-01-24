@@ -23,6 +23,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +39,7 @@ import heartmusic.data.PlaylistQuerySong
 import heartmusic.data.asMediaItems
 import heartmusic.viewmodel.PlayerViewModel
 import heartmusic.viewmodel.TopPlaylistViewModel
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
@@ -53,15 +55,21 @@ internal fun PlaylistSongsScreen() {
   ) {
     val playerVm: PlayerViewModel = getViewModel()
     val state = rememberLazyListState()
+    val scope = rememberCoroutineScope()
     val playlist = remember { vm.currentPlaylist!! }
-    val songs = vm.getSongs(playlistId = playlist.id).collectAsLazyPagingItems()
+    val songs = vm.getSongs(playlist = playlist).collectAsLazyPagingItems()
 
     BackHandler {
       vm.currentPlaylist = null
     }
 
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-      TopAppBar(title = { Text(playlist.name) })
+      TopAppBar(modifier = Modifier.clickable {
+        scope.launch {
+          state.animateScrollToItem(0)
+        }
+      },
+        title = { Text(text = playlist.name) })
       Songs(songs = songs, state = state) {
         playerVm.play(playlist.id, vm.songs, it)
       }
@@ -90,7 +98,7 @@ private fun Songs(
 ) {
   LazyColumn(
     state = state,
-    contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 64.dp),
+    contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 164.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp)
   ) {
     // todo: why there are duplicated items with the same id?

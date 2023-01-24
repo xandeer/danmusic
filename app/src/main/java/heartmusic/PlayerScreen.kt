@@ -50,7 +50,6 @@ import heartmusic.ui.theme.HeartMusicTheme
 import heartmusic.viewmodel.PlayerViewModel
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-import java.util.concurrent.TimeUnit
 
 private val logger get() = logger("PlayerBar")
 
@@ -74,8 +73,8 @@ internal fun PlayerBar(modifier: Modifier = Modifier) {
         imgUrl = it.picUrl,
         title = it.name,
         isPlaying = playerVm.isPlaying,
-        position = playerVm.positionMs,
-        duration = playerVm.durationMs,
+        position = playerVm.position,
+        duration = playerVm.duration,
         onTogglePlaying = playerVm::toggle,
         isNextEnabled = player.hasNextMediaItem(),
         onNext = player::seekToNext
@@ -90,8 +89,8 @@ private fun AudioController(
   imgUrl: String,
   title: String,
   isPlaying: Boolean,
-  position: Long = 0,
-  duration: Long = 0,
+  position: Millis = 0,
+  duration: Millis = 0,
   onTogglePlaying: () -> Unit,
   isNextEnabled: Boolean = true,
   onNext: () -> Unit
@@ -162,7 +161,7 @@ private fun AudioController(
           style = MaterialTheme.typography.titleSmall
         )
         Text(
-          text = "${position.toTime()}/${duration.toTime()}",
+          text = "${position.toMinutesSeconds()}/${duration.toMinutesSeconds()}",
           style = MaterialTheme.typography.labelSmall,
           color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
@@ -179,12 +178,6 @@ private fun AudioController(
       }
     }
   }
-}
-
-private fun Long.toTime(): String {
-  val minute = TimeUnit.MILLISECONDS.toMinutes(this)
-  val second = TimeUnit.MILLISECONDS.toSeconds(this) - TimeUnit.MINUTES.toSeconds(minute)
-  return "%02d:%02d".format(minute, second)
 }
 
 @Composable

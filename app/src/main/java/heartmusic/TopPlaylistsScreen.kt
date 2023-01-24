@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +37,7 @@ import coil.compose.AsyncImage
 import heartmusic.data.Playlist
 import heartmusic.ui.theme.HeartMusicTheme
 import heartmusic.viewmodel.TopPlaylistViewModel
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,8 +50,18 @@ internal fun TopPlaylistsScreen() {
       .fillMaxSize()
       .background(MaterialTheme.colorScheme.background)
   ) {
-    TopAppBar(title = { Text("Playlists") })
-    Playlists(playlists = playlists) { playlist ->
+    val state = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    TopAppBar(modifier = Modifier.clickable {
+      scope.launch {
+        state.animateScrollToItem(0)
+      }
+    },
+      title = { Text("Playlists") })
+    Playlists(
+      state = state,
+      playlists = playlists
+    ) { playlist ->
       vm.currentPlaylist = playlist
     }
   }
@@ -93,9 +107,11 @@ private fun PreviewRetryButton() {
 @Composable
 private fun Playlists(
   playlists: LazyPagingItems<Playlist>,
+  state: LazyListState,
   onItemClick: (Playlist) -> Unit = {}
 ) {
   LazyColumn(
+    state = state,
     verticalArrangement = Arrangement.spacedBy(8.dp),
     contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 64.dp)
   ) {

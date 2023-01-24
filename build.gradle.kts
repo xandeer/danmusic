@@ -64,6 +64,10 @@ allprojects {
       finalizedBy("uninstallDebugAndroidTest")
     }
   }
+
+  tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+  }
 }
 
 tasks.register("clean") {
