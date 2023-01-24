@@ -22,10 +22,10 @@ class TopPlaylistViewModel constructor(
 
   private val playlistSongs = mutableMapOf<Long, Flow<PagingData<PlaylistQuerySong>>>()
 
-  fun getSongs(playlistId: Long) = playlistSongs.getOrPut(playlistId) {
-    repository.getPlaylistSongs(playlistId).flow.cachedIn(viewModelScope)
+  fun getSongs(playlist: Playlist) = playlistSongs.getOrPut(playlist.id) {
+    repository.getPlaylistSongs(playlist.id).flow.cachedIn(viewModelScope)
       .also {
-        logger.i("getSongs: $playlistId")
+        logger.i("getSongs: ${playlist.name}, id: ${playlist.id}")
       }
   }
 

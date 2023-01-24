@@ -60,7 +60,11 @@ dependencies {
 
   debugImplementation(libs.leakCanary)
 
-  testImplementation(libs.bundles.test.jvm)
+//  testImplementation(libs.bundles.test.jvm)
+  testImplementation(platform(libs.kotlin.bom))
+  testImplementation(libs.kotlin.reflect)
+  testImplementation(platform(libs.kotest.bom))
+  testImplementation(libs.bundles.kotest)
 
   androidTestImplementation(libs.bundles.test.android)
 }

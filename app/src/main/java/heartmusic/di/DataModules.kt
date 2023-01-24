@@ -28,7 +28,7 @@ val DataModule = module {
 
   viewModelOf(::TopPlaylistViewModel)
 
-  viewModelOf(::PlayerViewModel)
+  singleOf(::PlayerViewModel)
   single {
     ExoPlayer.Builder(androidContext())
       .build()
