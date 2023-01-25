@@ -1,3 +1,4 @@
+import heartmusic.kotestDebug
 import heartmusic.setupAppModule
 
 plugins {
@@ -65,6 +66,14 @@ dependencies {
   testImplementation(libs.kotlin.reflect)
   testImplementation(platform(libs.kotest.bom))
   testImplementation(libs.bundles.kotest)
+
+  // Just for temporary use
+  if (kotestDebug) {
+    debugImplementation(platform(libs.kotlin.bom))
+    debugImplementation(libs.kotlin.reflect)
+    debugImplementation(platform(libs.kotest.bom))
+    debugImplementation(libs.bundles.kotest)
+  }
 
   androidTestImplementation(libs.bundles.test.android)
 }
