@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,13 +27,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
 import heartmusic.data.Playlist
+import heartmusic.ui.LoadingScreen
+import heartmusic.ui.swallowClick
 import heartmusic.ui.theme.HeartMusicTheme
 import heartmusic.viewmodel.TopPlaylistViewModel
 import kotlinx.coroutines.launch
@@ -65,25 +65,26 @@ internal fun TopPlaylistsScreen() {
       vm.currentPlaylist = playlist
     }
   }
-  LoadStates(loadState = playlists.loadState) {
+  LoadingScreen(visible = playlists.loadState.refresh is LoadState.Loading)
+  RetryScreen(visible = playlists.loadState.refresh is LoadState.Error) {
     playlists.retry()
   }
 }
 
 @Composable
-private fun LoadStates(
-  loadState: CombinedLoadStates,
+private fun RetryScreen(
+  visible: Boolean,
   retry: () -> Unit
 ) {
+  if (!visible) return
+
   Box(
-    modifier = Modifier.fillMaxSize(),
+    modifier = Modifier
+      .fillMaxSize()
+      .swallowClick(),
     contentAlignment = Alignment.Center
   ) {
-    when (loadState.refresh) {
-      is LoadState.Loading -> CircularProgressIndicator()
-      is LoadState.Error -> RetryButton(onClick = retry)
-      else -> Unit
-    }
+    RetryButton(onClick = retry)
   }
 }
 

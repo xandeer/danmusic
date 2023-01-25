@@ -2,6 +2,8 @@ package heartmusic
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
@@ -31,12 +33,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
 import heartmusic.data.PlaylistQuerySong
 import heartmusic.data.asMediaItems
+import heartmusic.ui.LoadingScreen
 import heartmusic.viewmodel.PlayerViewModel
 import heartmusic.viewmodel.TopPlaylistViewModel
 import kotlinx.coroutines.launch
@@ -49,8 +53,8 @@ internal fun PlaylistSongsScreen() {
   val vm: TopPlaylistViewModel = getViewModel()
   AnimatedVisibility(
     visible = vm.currentPlaylist != null,
-    enter = slideInHorizontally(initialOffsetX = { it }),
-    exit = slideOutHorizontally(targetOffsetX = { it }),
+    enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
+    exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
     modifier = Modifier.fillMaxSize()
   ) {
     val playerVm: PlayerViewModel = getViewModel()
@@ -74,6 +78,8 @@ internal fun PlaylistSongsScreen() {
         playerVm.play(playlist.id, vm.songs, it)
       }
     }
+
+    LoadingScreen(visible = songs.loadState.refresh is LoadState.Loading)
 
     val player: ExoPlayer = get()
     LaunchedEffect(key1 = songs.itemSnapshotList.items) {
