@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
+import java.util.Properties
 import kotlin.math.pow
 
 val Project.minSdk: Int
@@ -39,12 +40,28 @@ val Project.versionCode: Int
       (unit * 10.0.pow(2 * index + 1)).toInt()
     }
 
+val Project.kotestDebug: Boolean
+  get() = booleanLocalProperty("kotest.debug")
+
 private fun Project.intProperty(name: String): Int {
   return (property(name) as String).toInt()
 }
 
 private fun Project.stringProperty(name: String): String {
   return property(name) as String
+}
+
+private fun Project.booleanLocalProperty(name: String): Boolean {
+  return localProperties[name]?.toString()?.toBoolean() ?: false
+}
+
+private var localProperties: Properties? = null
+
+private val Project.localProperties: Properties get() {
+  return heartmusic.localProperties ?: Properties().apply {
+    rootProject.file("local.properties").inputStream().use(::load)
+    heartmusic.localProperties = this
+  }
 }
 
 private inline fun <T> List<T>.sumByIndexed(selector: (Int, T) -> Int): Int {
