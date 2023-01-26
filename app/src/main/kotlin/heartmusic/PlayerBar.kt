@@ -99,7 +99,8 @@ private fun AudioController(
     modifier = Modifier
       .fillMaxWidth()
       .height(48.dp)
-      .background(MaterialTheme.colorScheme.surface)
+      .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.88f))
+      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
   ) {
     Slider(
       modifier = Modifier
