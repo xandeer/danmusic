@@ -8,7 +8,7 @@ import heartmusic.data.Playlist
 import heartmusic.data.PlaylistSong
 import heartmusic.data.Song
 import heartmusic.data.SongUrl
-import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.days
 
 @Database(
   entities = [
@@ -42,4 +42,4 @@ abstract class HeartPlaylistDb : RoomDatabase() {
   abstract fun cacheTime(): CacheTimeDao
 }
 
-val dbCacheTimeout = TimeUnit.MILLISECONDS.convert(100, TimeUnit.MINUTES)
+val dbCacheTimeout = 21.days.inWholeMilliseconds

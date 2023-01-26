@@ -13,12 +13,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,14 +32,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
+import androidx.compose.ui.zIndex
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
 import heartmusic.data.Playlist
-import heartmusic.ui.LoadingScreen
-import heartmusic.ui.swallowClick
+import heartmusic.ui.ProgressIndicator
+import heartmusic.ui.appending
+import heartmusic.ui.refreshing
 import heartmusic.ui.theme.HeartMusicTheme
 import heartmusic.viewmodel.TopPlaylistViewModel
 import kotlinx.coroutines.launch
@@ -52,11 +58,14 @@ internal fun TopPlaylistsScreen() {
   ) {
     val state = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    TopAppBar(modifier = Modifier.clickable {
-      scope.launch {
-        state.animateScrollToItem(0)
-      }
-    },
+    TopAppBar(modifier = Modifier
+      // Overlay the pull refresh indicator.
+      .zIndex(1f)
+      .clickable {
+        scope.launch {
+          state.animateScrollToItem(0)
+        }
+      },
       title = { Text("Playlists") })
     Playlists(
       state = state,
@@ -64,27 +73,6 @@ internal fun TopPlaylistsScreen() {
     ) { playlist ->
       vm.currentPlaylist = playlist
     }
-  }
-  LoadingScreen(visible = playlists.loadState.refresh is LoadState.Loading)
-  RetryScreen(visible = playlists.loadState.refresh is LoadState.Error) {
-    playlists.retry()
-  }
-}
-
-@Composable
-private fun RetryScreen(
-  visible: Boolean,
-  retry: () -> Unit
-) {
-  if (!visible) return
-
-  Box(
-    modifier = Modifier
-      .fillMaxSize()
-      .swallowClick(),
-    contentAlignment = Alignment.Center
-  ) {
-    RetryButton(onClick = retry)
   }
 }
 
@@ -105,22 +93,44 @@ private fun PreviewRetryButton() {
   }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun Playlists(
   playlists: LazyPagingItems<Playlist>,
   state: LazyListState,
   onItemClick: (Playlist) -> Unit = {}
 ) {
-  LazyColumn(
-    state = state,
-    verticalArrangement = Arrangement.spacedBy(8.dp),
-    contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 64.dp)
+  val refreshing by playlists.refreshing
+  val pullRefreshState = rememberPullRefreshState(refreshing, playlists::refresh)
+
+  Box(
+    modifier = Modifier
+      .fillMaxWidth()
+      .pullRefresh(state = pullRefreshState)
   ) {
-    items(playlists) {
-      it?.let { playlist ->
-        PlayListItem(playlist = playlist, onClick = onItemClick)
+    val appending by playlists.appending
+    LazyColumn(
+      state = state,
+      verticalArrangement = Arrangement.spacedBy(8.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 64.dp)
+    ) {
+      if (!refreshing) {
+        items(playlists) {
+          it?.let { playlist ->
+            PlayListItem(playlist = playlist, onClick = onItemClick)
+          }
+        }
+      }
+      if (appending) {
+        item { ProgressIndicator() }
       }
     }
+    PullRefreshIndicator(
+      refreshing = refreshing,
+      state = pullRefreshState,
+      modifier = Modifier.align(Alignment.TopCenter)
+    )
   }
 }
 

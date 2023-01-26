@@ -9,6 +9,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,12 +19,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -32,15 +38,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
 import heartmusic.data.PlaylistQuerySong
 import heartmusic.data.asMediaItems
-import heartmusic.ui.LoadingScreen
+import heartmusic.ui.ProgressIndicator
+import heartmusic.ui.appending
+import heartmusic.ui.refreshing
 import heartmusic.viewmodel.PlayerViewModel
 import heartmusic.viewmodel.TopPlaylistViewModel
 import kotlinx.coroutines.launch
@@ -68,18 +76,20 @@ internal fun PlaylistSongsScreen() {
     }
 
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-      TopAppBar(modifier = Modifier.clickable {
-        scope.launch {
-          state.animateScrollToItem(0)
-        }
-      },
+      TopAppBar(modifier = Modifier
+        // Overlay the pull refresh indicator.
+        .zIndex(1f)
+        .clickable {
+          scope.launch {
+            state.animateScrollToItem(0)
+          }
+        },
         title = { Text(text = playlist.name) })
+
       Songs(songs = songs, state = state) {
         playerVm.play(playlist.id, vm.songs, it)
       }
     }
-
-    LoadingScreen(visible = songs.loadState.refresh is LoadState.Loading)
 
     val player: ExoPlayer = get()
     LaunchedEffect(key1 = songs.itemSnapshotList.items) {
@@ -96,20 +106,47 @@ internal fun PlaylistSongsScreen() {
   }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun Songs(
   songs: LazyPagingItems<PlaylistQuerySong>,
   state: LazyListState,
   onItemClick: (PlaylistQuerySong) -> Unit = {}
 ) {
-  LazyColumn(
-    state = state,
-    contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 164.dp),
-    verticalArrangement = Arrangement.spacedBy(16.dp)
+  val refreshing by songs.refreshing
+  val pullRefreshState = rememberPullRefreshState(
+    refreshing = refreshing,
+    onRefresh = songs::refresh
+  )
+  Box(
+    modifier = Modifier
+      .fillMaxWidth()
+      .pullRefresh(pullRefreshState)
   ) {
-    // todo: why there are duplicated items with the same id?
-    items(songs, key = { "${it.id}-$it" }) { song ->
-      song?.let { SongItem(song = it, onClick = onItemClick) }
+    val appending by songs.appending
+    LazyColumn(
+      state = state,
+      contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 164.dp),
+      verticalArrangement = Arrangement.spacedBy(16.dp),
+      horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+      if (!refreshing) {
+        // todo: why there are duplicated items with the same id?
+        items(songs, key = { "${it.id}-$it" }) { song ->
+          song?.let { SongItem(song = it, onClick = onItemClick) }
+        }
+      }
+      if (appending) {
+        item { ProgressIndicator() }
+      }
+    }
+
+    // todo: why the indicator is visible when not pulling?
+    if (refreshing || pullRefreshState.progress > 0) {
+      PullRefreshIndicator(
+        refreshing = refreshing, state = pullRefreshState,
+        modifier = Modifier.align(Alignment.TopCenter)
+      )
     }
   }
 }
