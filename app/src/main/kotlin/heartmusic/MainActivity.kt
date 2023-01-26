@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
 
   private fun render() {
     setContent {
-      HeartMusicTheme {
+      HeartMusicTheme(dynamicColor = false) {
         ConstraintLayout(
           modifier = Modifier
             .fillMaxSize()
