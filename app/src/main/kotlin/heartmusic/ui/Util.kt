@@ -2,9 +2,14 @@ package heartmusic.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 
 fun Modifier.swallowClick(): Modifier = clickableWithoutRipple {}
 
@@ -19,3 +24,13 @@ private fun Modifier.clickableWithoutRipple(
     onClick = onClick,
   )
 }
+
+val LazyPagingItems<*>.refreshing: State<Boolean>
+  @Composable get() = remember {
+    derivedStateOf { loadState.refresh is LoadState.Loading }
+  }
+
+val LazyPagingItems<*>.appending: State<Boolean>
+  @Composable get() = remember {
+    derivedStateOf { loadState.append is LoadState.Loading }
+  }
