@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
@@ -39,6 +38,7 @@ import androidx.paging.compose.items
 import coil.compose.AsyncImage
 import heartmusic.data.Playlist
 import heartmusic.ui.ProgressIndicator
+import heartmusic.ui.PullRefreshingIndicator
 import heartmusic.ui.appending
 import heartmusic.ui.refreshing
 import heartmusic.ui.theme.HeartMusicTheme
@@ -126,11 +126,8 @@ private fun Playlists(
         item { ProgressIndicator() }
       }
     }
-    PullRefreshIndicator(
-      refreshing = refreshing,
-      state = pullRefreshState,
-      modifier = Modifier.align(Alignment.TopCenter)
-    )
+
+    PullRefreshingIndicator(refreshing = refreshing, state = pullRefreshState)
   }
 }
 
