@@ -31,7 +31,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,11 +44,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import heartmusic.ui.theme.HeartMusicTheme
 import heartmusic.viewmodel.PlayerViewModel
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 private val logger get() = logger("PlayerBar")
@@ -57,9 +55,7 @@ private val logger get() = logger("PlayerBar")
 internal fun PlayerBar(modifier: Modifier = Modifier) {
   val playerVm: PlayerViewModel = getViewModel()
 
-  val playingSong by remember {
-    derivedStateOf { playerVm.songs.getOrNull(playerVm.currentIndex) }
-  }
+  val playingSong by playerVm.playingSong.collectAsState(initial = null)
 
   AnimatedVisibility(
     modifier = modifier,
@@ -67,7 +63,6 @@ internal fun PlayerBar(modifier: Modifier = Modifier) {
     enter = slideInVertically(initialOffsetY = { it }),
     exit = slideOutVertically(targetOffsetY = { it })
   ) {
-    val player: ExoPlayer = get()
     playingSong?.also {
       AudioController(
         imgUrl = it.picUrl,
@@ -76,8 +71,8 @@ internal fun PlayerBar(modifier: Modifier = Modifier) {
         position = playerVm.position,
         duration = playerVm.duration,
         onTogglePlaying = playerVm::toggle,
-        isNextEnabled = player.hasNextMediaItem(),
-        onNext = player::seekToNext
+        isNextEnabled = playerVm.hasNext,
+        onNext = playerVm::next
       )
     }
   }

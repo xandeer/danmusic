@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,6 +46,7 @@ import coil.compose.AsyncImage
 import heartmusic.data.PlaylistQuerySong
 import heartmusic.data.asMediaItems
 import heartmusic.ui.ProgressIndicator
+import heartmusic.ui.PullRefreshingIndicator
 import heartmusic.ui.appending
 import heartmusic.ui.refreshing
 import heartmusic.viewmodel.PlayerViewModel
@@ -141,13 +141,7 @@ private fun Songs(
       }
     }
 
-    // todo: why the indicator is visible when not pulling?
-    if (refreshing || pullRefreshState.progress > 0) {
-      PullRefreshIndicator(
-        refreshing = refreshing, state = pullRefreshState,
-        modifier = Modifier.align(Alignment.TopCenter)
-      )
-    }
+    PullRefreshingIndicator(refreshing = refreshing, state = pullRefreshState)
   }
 }
 

@@ -21,23 +21,25 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import org.koin.java.KoinJavaComponent.get
 import kotlin.math.abs
 
 private val logger get() = logger("PlayerViewModel")
 
-class PlayerViewModel : ViewModel() {
-  private val player: ExoPlayer = get(ExoPlayer::class.java)
-
+class PlayerViewModel(private val player: ExoPlayer) : ViewModel() {
   var isPlaying by mutableStateOf(false)
     private set
 
-  var currentIndex by mutableStateOf(-1)
-    private set
+  private var currentIndex by mutableStateOf(-1)
 
   var playlistId by mutableStateOf(-1L)
     private set
+
+  val playingSong
+    get() = snapshotFlow { songs }.combine(snapshotFlow { currentIndex }) { songs, index ->
+      songs.getOrNull(index)
+    }.distinctUntilChanged()
 
   var songs by mutableStateOf(emptyList<PlaylistQuerySong>())
     private set
@@ -106,6 +108,13 @@ class PlayerViewModel : ViewModel() {
     }
   }
 
+  var hasNext by mutableStateOf(false)
+    private set
+
+  fun next() {
+    player.seekToNext()
+  }
+
   private fun pause() {
     isPlaying = false
     player.pause()
@@ -149,6 +158,11 @@ class PlayerViewModel : ViewModel() {
       viewModelScope.launch { _errorFlow.emit(error) }
       logger.e(error, "onPlayerError: ${error.message}")
     }
+
+    override fun onAvailableCommandsChanged(availableCommands: Player.Commands) {
+      super.onAvailableCommandsChanged(availableCommands)
+      hasNext = availableCommands.contains(Player.COMMAND_SEEK_TO_NEXT)
+    }
   }
 
   private fun updateByPosition(index: Int) {
@@ -156,16 +170,14 @@ class PlayerViewModel : ViewModel() {
   }
 
   private fun observeSeek() {
-    val nextIndex = snapshotFlow { currentIndex }
-      .combine(snapshotFlow { playlistId }) { index, _ ->
-        index
-      }
     viewModelScope.launch {
-      nextIndex.collect {
-        if (it in songs.indices) {
-          logger.d("seekTo: $it")
-          player.seekTo(it, 0L)
-          play()
+      playingSong.collect {
+        songs.indexOf(it).also { idx ->
+          if (idx > -1) {
+            logger.d("seekTo: $it")
+            player.seekTo(idx, 0L)
+            play()
+          }
         }
       }
     }

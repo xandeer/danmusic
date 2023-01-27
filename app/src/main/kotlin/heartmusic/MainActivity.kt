@@ -1,5 +1,6 @@
 package heartmusic
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -20,6 +21,7 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     render()
     observePlayerError()
+    startService(Intent(this, PlayerService::class.java))
   }
 
   private fun render() {
@@ -46,7 +48,11 @@ class MainActivity : ComponentActivity() {
     get<PlayerViewModel>().apply {
       viewModelScope.launch {
         errorFlow.collect {
-          Toast.makeText(this@MainActivity, "Something wrong with player", Toast.LENGTH_SHORT)
+          Toast.makeText(
+            this@MainActivity,
+            "Something wrong with player, try to pull refresh.",
+            Toast.LENGTH_SHORT
+          )
             .show()
         }
       }
