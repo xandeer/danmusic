@@ -29,8 +29,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,10 +41,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
+import heartmusic.data.Playlist
 import heartmusic.data.PlaylistQuerySong
 import heartmusic.data.asMediaItems
 import heartmusic.ui.ProgressIndicator
@@ -57,22 +61,31 @@ import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun PlaylistSongsScreen() {
+internal fun PlaylistSongsScreen(
+  navController: NavController,
+  playlistId: Long
+) {
+  var playlist by remember {
+    mutableStateOf<Playlist?>(null)
+  }
   val vm: TopPlaylistViewModel = getViewModel()
+  LaunchedEffect(key1 = playlistId) {
+    playlist = vm.getPlaylist(playlistId)
+  }
   AnimatedVisibility(
-    visible = vm.currentPlaylist != null,
+    visible = playlist != null,
     enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
     exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
     modifier = Modifier.fillMaxSize()
   ) {
+    val list = playlist ?: return@AnimatedVisibility
     val playerVm: PlayerViewModel = getViewModel()
     val state = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    val playlist = remember { vm.currentPlaylist!! }
-    val songs = vm.getSongs(playlist = playlist).collectAsLazyPagingItems()
+    val songs = vm.getSongs(playlist = list).collectAsLazyPagingItems()
 
     BackHandler {
-      vm.currentPlaylist = null
+      navController.popBackStack()
     }
 
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
@@ -84,10 +97,10 @@ internal fun PlaylistSongsScreen() {
             state.animateScrollToItem(0)
           }
         },
-        title = { Text(text = playlist.name) })
+        title = { Text(text = list.name) })
 
       Songs(songs = songs, state = state) {
-        playerVm.play(playlist.id, vm.songs, it)
+        playerVm.play(playlistId, vm.songs, it)
       }
     }
 
@@ -95,7 +108,7 @@ internal fun PlaylistSongsScreen() {
     LaunchedEffect(key1 = songs.itemSnapshotList.items) {
       vm.songs = songs.itemSnapshotList.items
 
-      if (vm.currentPlaylist?.id == playerVm.playlistId) {
+      if (playlistId == playerVm.playlistId) {
         vm.songs.filter { it !in playerVm.songs }
           .also {
             playerVm.appendSongs(it)

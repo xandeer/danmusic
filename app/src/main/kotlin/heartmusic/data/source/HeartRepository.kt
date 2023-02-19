@@ -33,6 +33,10 @@ class HeartRepository(
     db.playlistSongs().playlistWithSongs(id)
   }
 
+  suspend fun getPlaylistById(id: Long) = withContext(Dispatchers.IO) {
+    db.playlists().getById(id)
+  }
+
   /**
    * Cached paging parameter, used to get the next page of data.
    */
