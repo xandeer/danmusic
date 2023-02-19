@@ -28,10 +28,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -48,7 +50,9 @@ import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun TopPlaylistsScreen() {
+internal fun TopPlaylistsScreen(
+  navController: NavController,
+) {
   val vm: TopPlaylistViewModel = getViewModel()
   val playlists = vm.playlists.collectAsLazyPagingItems()
   Column(
@@ -66,12 +70,14 @@ internal fun TopPlaylistsScreen() {
           state.animateScrollToItem(0)
         }
       },
-      title = { Text("Playlists") })
+      title = { Text(stringResource(id = TabScreen.Top.resourceId)) })
     Playlists(
       state = state,
       playlists = playlists
     ) { playlist ->
-      vm.currentPlaylist = playlist
+      navController.navigate(SubScreen.Songs.route(playlist.id)) {
+        restoreState = true
+      }
     }
   }
 }
