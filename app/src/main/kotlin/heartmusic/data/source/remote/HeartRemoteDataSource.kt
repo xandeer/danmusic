@@ -20,9 +20,12 @@ interface HeartRemoteDataSource {
     @Query("offset") offset: Int = 0
   ): PlaylistSongsResponse
 
+  /**
+   * @param id comma separated ids
+   */
   @GET("song/url/v1")
-  suspend fun getSongUrl(
-    @Query("id") id: Long,
+  suspend fun getSongUrls(
+    @Query("id") id: String,
     @Query("level") level: String = "standard"
   ): SongUrlResponse
 }

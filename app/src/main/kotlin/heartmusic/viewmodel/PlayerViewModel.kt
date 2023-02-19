@@ -27,7 +27,7 @@ import kotlin.math.abs
 
 class PlayerViewModel(private val player: ExoPlayer) : ViewModel() {
   internal val logger get() = logger("PlayerViewModel")
-  
+
   var isPlaying by mutableStateOf(false)
     internal set
 

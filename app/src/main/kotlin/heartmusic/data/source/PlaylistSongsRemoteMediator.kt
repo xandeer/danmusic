@@ -7,19 +7,10 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import heartmusic.data.PlaylistQuerySong
 import heartmusic.data.PlaylistSong
-import heartmusic.data.SongUrl
 import heartmusic.data.source.db.HeartPlaylistDb
 import heartmusic.data.source.db.dbCacheTimeout
 import heartmusic.data.source.remote.HeartRemoteDataSource
 import heartmusic.logger
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flattenMerge
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
-
-private val logger get() = logger("PlaylistSongsMediator")
 
 @OptIn(ExperimentalPagingApi::class)
 class PlaylistSongsRemoteMediator(
@@ -27,6 +18,8 @@ class PlaylistSongsRemoteMediator(
   private val db: HeartPlaylistDb,
   private val remote: HeartRemoteDataSource,
 ) : RemoteMediator<Int, PlaylistQuerySong>() {
+  private val logger get() = logger("PlaylistSongsMediator")
+
   private val songsDao = db.playlistSongs()
   private val cacheTimeDao = db.cacheTime()
 
@@ -42,7 +35,6 @@ class PlaylistSongsRemoteMediator(
     }
   }
 
-  @OptIn(FlowPreview::class)
   override suspend fun load(
     loadType: LoadType,
     state: PagingState<Int, PlaylistQuerySong>
@@ -66,15 +58,9 @@ class PlaylistSongsRemoteMediator(
       ).songs
 
       @Suppress("SENSELESS_COMPARISON")
-      val songUrls = flow { songs.map { emit(it) } }.map {
-        flow {
-          emit(remote.getSongUrl(it.id))
-        }
-      }.flattenMerge(state.config.pageSize).map { it.data[0] }.map {
-        SongUrl(it.id, it.url)
-      }.filter {
-        it.url != null
-      }.toList()
+      val songUrls = songs.map { it.id }.joinToString(",").let {
+        remote.getSongUrls(it).data
+      }.filter { it.url != null }
 
       val validIds = songUrls.map { it.id }
       songs = songs.filter { it.id in validIds }
