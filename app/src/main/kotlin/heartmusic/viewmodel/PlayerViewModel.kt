@@ -25,11 +25,11 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
-private val logger get() = logger("PlayerViewModel")
-
 class PlayerViewModel(private val player: ExoPlayer) : ViewModel() {
+  internal val logger get() = logger("PlayerViewModel")
+  
   var isPlaying by mutableStateOf(false)
-    private set
+    internal set
 
   private var currentIndex by mutableStateOf(-1)
 
@@ -109,13 +109,13 @@ class PlayerViewModel(private val player: ExoPlayer) : ViewModel() {
   }
 
   var hasNext by mutableStateOf(false)
-    private set
+    internal set
 
   fun next() {
     player.seekToNext()
   }
 
-  private fun pause() {
+  internal fun pause() {
     isPlaying = false
     player.pause()
   }
@@ -165,7 +165,7 @@ class PlayerViewModel(private val player: ExoPlayer) : ViewModel() {
     }
   }
 
-  private fun updateByPosition(index: Int) {
+  internal fun updateByPosition(index: Int) {
     currentIndex = index
   }
 

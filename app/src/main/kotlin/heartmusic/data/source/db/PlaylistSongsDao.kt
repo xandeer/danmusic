@@ -15,7 +15,7 @@ import heartmusic.data.SongUrl
 interface PlaylistSongsDao {
   @Transaction
   @Query(
-    "SELECT s.albumName, s.albumId, s.songId as id, s.name, s.picUrl, s.publishTime, p.`offset`, u.url as songUrl FROM song s " +
+    "SELECT s.songId as id, s.name, s.picUrl, p.`offset`, u.url as songUrl FROM song s " +
       "JOIN playlistsong p " +
       "ON s.songId = p.songId " +
       "JOIN songurl u " +
@@ -24,10 +24,6 @@ interface PlaylistSongsDao {
       "ORDER BY `offset` ASC"
   )
   fun playlistWithSongs(playlistId: Long): PagingSource<Int, PlaylistQuerySong>
-
-  @Transaction
-  @Query("SELECT * FROM song WHERE songId IN (SELECT p.songId FROM playlistsong p WHERE p.playlistId = :playlistId)")
-  suspend fun allSongsInPlaylist(playlistId: Long): List<Song>
 
   @Query("SELECT MAX(`offset`) + 1 FROM playlistsong WHERE playlistId = :playlistId")
   suspend fun getNextOffset(playlistId: Long): Int?
