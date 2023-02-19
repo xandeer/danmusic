@@ -71,12 +71,16 @@ class MainActivity : ComponentActivity() {
               label = { Text(stringResource(id = screen.resourceId), color = contentColor) },
               selected = selected,
               onClick = {
-                navController.navigate(screen.route) {
-                  popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = true
+                if (selected && navController.currentDestination?.route != screen.route) {
+                  navController.popBackStack()
+                } else {
+                  navController.navigate(screen.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                      saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
                   }
-                  launchSingleTop = true
-                  restoreState = true
                 }
               }
             )
