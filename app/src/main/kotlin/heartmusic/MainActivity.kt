@@ -7,6 +7,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,8 +21,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewModelScope
@@ -61,17 +66,23 @@ class MainActivity : ComponentActivity() {
 
           tabScreens.forEach { screen ->
             val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
-            val contentColor by
-            animateColorAsState(
+            val contentColor by animateColorAsState(
               targetValue = if (selected) MaterialTheme.colorScheme.primary
               else MaterialTheme.colorScheme.onBackground
             )
+            val scale = remember { Animatable(1f) }
+            val spring = SpringSpec<Float>(stiffness = 300f, dampingRatio = 0.5f)
+            LaunchedEffect(selected) {
+              scale.animateTo(if (selected) 1.1f else 1f, spring)
+              scale.animateTo(1f, spring)
+            }
             BottomNavigationItem(
+              modifier = Modifier.scale(scale.value),
               icon = { Icon(screen.icon, contentDescription = null, tint = contentColor) },
               label = { Text(stringResource(id = screen.resourceId), color = contentColor) },
               selected = selected,
               onClick = {
-                if (selected && navController.currentDestination?.route != screen.route) {
+                if (selected && currentDestination?.route != currentDestination?.parent?.startDestinationRoute) {
                   navController.popBackStack()
                 } else {
                   navController.navigate(screen.route) {
@@ -82,8 +93,7 @@ class MainActivity : ComponentActivity() {
                     restoreState = true
                   }
                 }
-              }
-            )
+              })
           }
         }
       }) { innerPadding ->
@@ -149,8 +159,7 @@ class MainActivity : ComponentActivity() {
             this@MainActivity,
             "Something wrong with player, try to pull refresh.",
             Toast.LENGTH_SHORT
-          )
-            .show()
+          ).show()
         }
       }
     }

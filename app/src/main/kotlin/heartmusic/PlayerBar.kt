@@ -45,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
+import heartmusic.ui.swallowClick
 import heartmusic.ui.theme.HeartMusicTheme
 import heartmusic.viewmodel.PlayerViewModel
 import org.koin.androidx.compose.getViewModel
@@ -94,6 +95,7 @@ private fun AudioController(
     modifier = Modifier
       .fillMaxWidth()
       .height(48.dp)
+      .swallowClick()
       .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.88f))
       .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
   ) {
