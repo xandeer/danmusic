@@ -4,21 +4,23 @@ androidx-lifecycle = "2.4.1"
 androidx-test = "1.5.0"
 coil = "2.2.2"
 compose = "2023.01.00"
-composeCompiler = "1.4.0"
+composeCompiler = "1.4.3"
 composeConstraintLayout = "1.0.1"
 coroutines = "1.6.4"
 gradlePlugin = "7.4.1"
-gradlePluginKotlin = "1.8.0"
+gradlePluginKotlin = "1.8.10"
 koin = "3.2.2"
 koin-android = "3.3.0"
 koin-compose = "3.3.0"
 kotest = "5.5.4"
-kotlin = "1.8.0"
+kotlin = "1.8.10"
 ksp = "1.7.20-1.0.7"
 ktlint = "0.47.1"
 leak-canary = "2.10"
 media3 = "1.0.0-beta03"
 nav = "2.5.3"
+# unusual jump behavior when displaying paged data + remote mediator
+# https://issuetracker.google.com/issues/235319241
 paging = "3.1.1"
 paging-compose = "1.0.0-alpha17"
 retrofit = "2.9.0"
@@ -85,7 +87,6 @@ kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref 
 
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
-kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit" }
 
 ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
