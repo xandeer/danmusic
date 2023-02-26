@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import heartmusic.data.FavoriteSong
 import heartmusic.data.Playlist
 import heartmusic.data.PlaylistSong
 import heartmusic.data.Song
@@ -17,6 +18,7 @@ import kotlin.time.Duration.Companion.days
     Song::class,
     PlaylistSong::class,
     SongUrl::class,
+    FavoriteSong::class,
   ],
   version = 1,
   exportSchema = false
@@ -38,6 +40,8 @@ abstract class HeartPlaylistDb : RoomDatabase() {
   abstract fun playlists(): HeartPlaylistDao
 
   abstract fun playlistSongs(): PlaylistSongsDao
+
+  abstract fun favoriteSongs(): FavoriteSongsDao
 
   abstract fun cacheTime(): CacheTimeDao
 }

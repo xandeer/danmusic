@@ -2,8 +2,10 @@ package heartmusic.di
 
 import androidx.media3.exoplayer.ExoPlayer
 import heartmusic.data.source.HeartRepository
+import heartmusic.data.source.LocalFavoriteRepository
 import heartmusic.data.source.db.HeartPlaylistDb
 import heartmusic.data.source.remote.HeartRemoteDataSource
+import heartmusic.viewmodel.FavoriteSongViewModel
 import heartmusic.viewmodel.PlayerViewModel
 import heartmusic.viewmodel.TopPlaylistViewModel
 import org.koin.android.ext.koin.androidContext
@@ -36,4 +38,7 @@ val DataModule = module {
         playWhenReady = true
       }
   }
+
+  singleOf(::LocalFavoriteRepository)
+  singleOf(::FavoriteSongViewModel)
 }

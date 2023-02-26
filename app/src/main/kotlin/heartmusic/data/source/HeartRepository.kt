@@ -10,15 +10,15 @@ import heartmusic.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-private const val ITEMS_PER_PAGE = 7
-
-private val logger get() = logger("HeartRepository")
+internal const val ITEMS_PER_PAGE = 7
 
 @OptIn(ExperimentalPagingApi::class)
 class HeartRepository(
   private val remote: HeartRemoteDataSource,
   private val db: HeartPlaylistDb,
 ) {
+  private val logger get() = logger("HeartRepository")
+
   val topPlaylistPager = Pager(
     config = PagingConfig(pageSize = ITEMS_PER_PAGE, initialLoadSize = 1),
     remoteMediator = TopPlaylistRemoteMediator(db = db, remote = remote)
